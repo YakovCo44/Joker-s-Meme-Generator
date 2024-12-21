@@ -1,0 +1,324 @@
+/* Page Background */
+body {
+    background: url('../img/joker-bg2.jpg') no-repeat center center fixed; /* Center the background */
+    background-size: cover; /* Ensures the background covers the entire viewport */
+    filter: brightness(80%);
+    color: white;
+    font-family: 'Courier New', Courier, monospace; /* Joker-like font */
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+
+
+/* Title Style */
+.title {
+    text-align: center;
+    font-size: 60px;
+    color: #50c878; /* Bright emerald green */
+    text-shadow: 3px 3px 10px #2e8b57, -3px -3px 10px #7a2a8a; /* Dual green-purple shadow */
+    margin: 20px 0;
+    animation: color-shift 4s infinite; /* Animated color shift */
+}
+
+/* Toolbar */
+.toolbar {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    background: rgba(0, 0, 0, 0.7); /* Semi-transparent black */
+    padding: 15px 25px;
+    border: 3px solid #50c878; /* Emerald green border */
+    border-radius: 15px;
+    box-shadow: 0px 10px 15px rgba(0, 0, 0, 0.5);
+    margin-bottom: 20px;
+}
+
+/* Buttons */
+button {
+    background-color: #7a2a8a; /* Deep purple */
+    color: #50c878; /* Bright green */
+    font-weight: bold;
+    font-size: 18px;
+    padding: 12px 30px;
+    border: 2px solid #50c878; /* Matching green border */
+    border-radius: 10px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+button:hover {
+    background-color: #2e8b57; /* Switch to Joker green on hover */
+    color: #ffffff; /* White text for contrast */
+    transform: scale(1.2) rotate(-5deg); /* Subtle tilt */
+    box-shadow: 0 8px 15px rgba(0, 255, 0, 0.5); /* Green glow */
+}
+
+/* Gallery */
+.gallery {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 25px;
+    padding: 20px;
+}
+
+.gallery-img {
+    width: 220px;
+    height: auto;
+    cursor: pointer;
+    border: 3px solid #171817; /* Green border */
+    border-radius: 15px;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.gallery-img:hover {
+    transform: scale(1.2) rotate(5deg); /* Gentle tilt */
+    box-shadow: 0 10px 20px rgba(5, 250, 5, 0.6); /* Purple glow */
+}
+
+/* Meme Editor */
+.editor {
+    text-align: center;
+    color: #50c878; /* Emerald green text */
+    margin: 20px;
+}
+
+.canvas-container {
+    margin: auto;
+    width: fit-content;
+    border: 5px solid #7a2a8a; /* Deep purple border */
+    border-radius: 20px;
+    background: rgba(0, 0, 0, 0.8); /* Dark background for focus */
+    padding: 20px;
+}
+
+.controls input,
+.controls button {
+    margin: 10px;
+    padding: 12px;
+    font-size: 16px;
+    border-radius: 10px;
+    border: 2px solid #50c878; /* Green border */
+    background-color: #7a2a8a; /* Deep purple */
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+.controls input:hover,
+.controls button:hover {
+    background-color: #50c878; /* Green hover effect */
+    transform: scale(1.1);
+}
+
+/* Modal */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(122, 42, 138, 0.8), rgba(46, 139, 87, 0.8)); /* Purple-green radial gradient */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    animation: pulse 2s infinite; /* Gentle pulsing */
+}
+
+.modal-content {
+    background: linear-gradient(135deg, #50c878, #7a2a8a); /* Green to purple */
+    border: 4px solid #ffffff; /* Bold white border */
+    border-radius: 25px;
+    padding: 30px;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.6);
+    width: 80%;
+    max-width: 600px;
+    font-weight: bold;
+    text-align: center;
+    color: rgb(36, 1, 36);
+    position: relative;
+}
+
+.modal-content::before {
+    content: "HAHAHAHA";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    font-size: 50px;
+    font-weight: bold;
+    color: rgba(255, 255, 255, 0.1);
+    z-index: -1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transform: rotate(-10deg);
+}
+
+.close-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-size: 24px;
+    font-weight: bold;
+    color: #ff0000; /* Joker red */
+    cursor: pointer;
+    transition: transform 0.3s, color 0.3s;
+}
+
+.close-btn:hover {
+    transform: scale(1.3) rotate(15deg);
+    color: yellow;
+}
+
+.meme-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 10px;
+}
+
+/* Save Confirmation Modal */
+.save-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8); /* Semi-transparent background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.save-modal .modal-content {
+    background: linear-gradient(135deg, #50c878, #7a2a8a); /* Joker-themed gradient */
+    color: white;
+    padding: 20px 30px;
+    border-radius: 15px;
+    font-size: 18px;
+    text-align: center;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+    animation: fadeInOut 2s;
+}
+
+.controls select,
+.controls input,
+.controls button {
+    margin: 5px;
+    padding: 10px;
+    font-size: 14px;
+    border-radius: 5px;
+    border: 2px solid #50c878;
+    background-color: #7a2a8a;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.controls button:hover {
+    background-color: #50c878;
+    color: #000;
+}
+
+.spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* Full height to center vertically */
+    width: 100%; /* Full width */
+    position: fixed; /* Ensure it overlays the entire page */
+    top: 0;
+    left: 0;
+    background: rgba(0, 0, 0, 0.85); /* Less transparency for better visibility */
+    z-index: 1000; /* Ensure it’s on top */
+    color: #50c878; /* Bright Joker green */
+    font-size: 24px;
+    font-weight: bold;
+    text-transform: uppercase;
+    animation: fadeIn 0.5s ease-in-out; /* Fade-in effect */
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+.spinner p {
+    animation: pulse 1.5s infinite; /* Pulsing effect for text */
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 0.8;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.2);
+    }
+    100% {
+        opacity: 0.8;
+        transform: scale(1);
+    }
+}
+
+
+
+/* Fade In and Out Animation */
+@keyframes fadeInOut {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+}
+
+
+
+/* Animations */
+@keyframes color-shift {
+    0% {
+        color: #fc06be;
+    }
+    50% {
+        color: #08f858;
+    }
+    100% {
+        color: #fc06be;
+    }
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+
+
