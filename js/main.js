@@ -6,7 +6,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const savedMemes = []
     localStorage.setItem('savedMemes', JSON.stringify(savedMemes))
 
-    let textBlocks = []
     let selectedTextIndex = -1
 
     const images = [
@@ -53,6 +52,12 @@ document.addEventListener('DOMContentLoaded', () => {
         'img/very-poor-choice-of-words.jpg',
         'img/xS80POlg.jpg',
         'img/ykiuo.jpg',
+        'img/da6kc.jpg',
+        'img/5r0gun.jpg',
+        'img/1cq3yn.jpg',
+        'img/fwg9u.jpg',
+        'img/52zhla.jpg',
+        'img/7ndgqg.jpg',
     ]
 
     function loadGallery() {
@@ -71,7 +76,6 @@ document.addEventListener('DOMContentLoaded', () => {
             gallery.appendChild(img)
         })
     
-        // Reattach the About button listener
         const aboutBtn = document.getElementById('aboutBtn')
         if (aboutBtn) {
             aboutBtn.addEventListener('click', openAboutModal)
@@ -87,6 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <canvas id="memeCanvas"></canvas>
                 </div>
                 <div class="controls">
+                    <button id="addTextBlockBtn">Add Text Block</button>
                     <input type="text" id="memeText" placeholder="Enter text">
                     <input type="color" id="textColor" value="#ffffff">
                     <select id="fontStyle">
@@ -101,7 +106,6 @@ document.addEventListener('DOMContentLoaded', () => {
                             <button id="italicBtn">Italic</button>
                             <button id="deleteBtn">Delete Text</button>
                             <button id="resetBtn">Reset</button>
-                            <button id="addTextBlockBtn">Add Text Block</button>
                             <button id="saveBtn">Save Meme</button>
                 </div>
             </div>
@@ -147,7 +151,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         })
         
-        // Allow color updates for selected text block
         document.getElementById('textColor').addEventListener('input', () => {
             if (selectedTextIndex >= 0) {
                 textBlocks[selectedTextIndex].color = document.getElementById('textColor').value
@@ -166,14 +169,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         document.getElementById('fontSize').addEventListener('input', (e) => {
             if (selectedTextIndex >= 0) {
-                textBlocks[selectedTextIndex].font = `${e.target.value}px Arial` // Update font size
+                textBlocks[selectedTextIndex].font = `${e.target.value}px Arial` 
                 drawCanvas()
             }
         })
 
         document.getElementById('fontStyle').addEventListener('change', (e) => {
             if (selectedTextIndex >= 0) {
-                const fontSize = textBlocks[selectedTextIndex].font.split(' ')[0] // Keep current size
+                const fontSize = textBlocks[selectedTextIndex].font.split(' ')[0] 
                 textBlocks[selectedTextIndex].font = `${fontSize} ${e.target.value}`
                 drawCanvas()
             }
@@ -201,15 +204,15 @@ document.addEventListener('DOMContentLoaded', () => {
         
         document.getElementById('deleteBtn').addEventListener('click', () => {
             if (selectedTextIndex >= 0) {
-                textBlocks.splice(selectedTextIndex, 1) // Remove the selected block
-                selectedTextIndex = -1 // Deselect
+                textBlocks.splice(selectedTextIndex, 1) 
+                selectedTextIndex = -1 
                 drawCanvas()
             }
         })
         
         document.getElementById('resetBtn').addEventListener('click', () => {
-            textBlocks = [] // Clear all text blocks
-            selectedTextIndex = -1 // Deselect
+            textBlocks = [] 
+            selectedTextIndex = -1 
             drawCanvas()
         })
         
@@ -218,7 +221,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const mouseX = e.offsetX
             const mouseY = e.offsetY
         
-            // Find the clicked text block
             selectedTextIndex = textBlocks.findIndex(block => {
                 const textWidth = ctx.measureText(block.text).width
                 return (
@@ -228,8 +230,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     mouseY <= block.y + 5
                 )
             })
-        
-            // If a text block is selected, load its properties into the controls
+
             if (selectedTextIndex >= 0) {
                 isDragging = true
                 const selectedBlock = textBlocks[selectedTextIndex]
@@ -250,13 +251,11 @@ document.addEventListener('DOMContentLoaded', () => {
         })
 
         document.getElementById('saveBtn').addEventListener('click', () => {
-            // Save the canvas as an image
             const memeImage = canvas.toDataURL('image/png')
         
-            // Save the meme with its text blocks
             savedMemes.push({
                 image: memeImage,
-                textBlocks: [...textBlocks] // Save a copy of the current text blocks
+                textBlocks: [...textBlocks] 
             })
         
             showModal('Meme saved successfully!')
@@ -289,9 +288,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 2000)
     }
     
-    
-
-// Function to draw the canvas with the current text
 function drawCanvas() {
     ctx.clearRect(0, 0, canvas.width, canvas.height)
     ctx.drawImage(img, 0, 0)
@@ -309,8 +305,6 @@ function drawCanvas() {
     })
 }
 
-
-
 function openAboutModal() {
     const modal = document.createElement('div')
     modal.className = 'modal'
@@ -318,46 +312,25 @@ function openAboutModal() {
     modal.innerHTML = `
         <div class="modal-content">
             <span class="close-btn">&times;</span>
-            <h1 class="title">About</h1>
+            <h1 class="title">If you want to know more...</h1>
             <p>HA HA HA! This is a Joker-themed meme generator. Select a template and start making fun of Batsy and his Super-Friends!</p>
         </div>
     `
     document.body.appendChild(modal)
 
-    // Close the modal when the "X" button is clicked
+    modal.scrollIntoView({ behavior: 'smooth', block: 'center' })
+
     const closeBtn = modal.querySelector('.close-btn')
     closeBtn.addEventListener('click', () => {
         modal.remove()
     })
 }
 
-
-    // Add a new text block
 function addTextBlock(text = '', x = 50, y = 50, color = '#ffffff', font = '30px Arial') {
     textBlocks.push({ text, x, y, color, font })
-    selectedTextIndex = textBlocks.length - 1 // Automatically select the new block
+    selectedTextIndex = textBlocks.length - 1 
     drawCanvas()
 }
-
-// Draw all text blocks and highlight the selected one
-function drawCanvas() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
-    ctx.drawImage(img, 0, 0)
-
-    textBlocks.forEach((block, index) => {
-        ctx.fillStyle = block.color
-        ctx.font = block.font
-        ctx.fillText(block.text, block.x, block.y)
-
-        // Draw a border around the selected text block
-        if (index === selectedTextIndex) {
-            const textWidth = ctx.measureText(block.text).width
-            ctx.strokeStyle = '#ff0000' // Red border for the selected text
-            ctx.strokeRect(block.x - 5, block.y - 25, textWidth + 10, 30)
-        }
-    })
-}
-    
     
 document.getElementById('savedBtn').addEventListener('click', () => {
     content.innerHTML = `
@@ -380,51 +353,62 @@ document.getElementById('savedBtn').addEventListener('click', () => {
         savedGallery.appendChild(memeContainer)
     })
 
-    // Reattach the About button listener
     const aboutBtn = document.getElementById('aboutBtn')
     if (aboutBtn) {
         aboutBtn.addEventListener('click', openAboutModal)
     }
 })
 
+function createFloatingText() {
+    for (let i = 0; i < 10; i++) {
+        const haha = document.createElement('div')
+        haha.className = 'haha'
+        haha.innerText = 'HAHAHA'
+        haha.style.position = 'absolute'
+        haha.style.top = `${Math.random() * window.innerHeight}px`
+        haha.style.left = `${Math.random() * window.innerWidth}px`
+        haha.style.fontSize = `${Math.random() * 30 + 20}px`
+        haha.style.zIndex = '1000'
+        document.body.appendChild(haha)
+
+        setTimeout(() => haha.remove(), 3000)
+    }
+}
 
 document.getElementById('crazyBtn').addEventListener('click', () => {
+    const flashOverlay = document.getElementById('flash-overlay')
+
+    flashOverlay.classList.add('flash')
+
+    const laughSound = new Audio('audio/joker-laugh.mp3')
+    laughSound.play()
+
+    document.body.classList.add('shake')
+    setTimeout(() => {
+        document.body.classList.remove('shake')
+    }, 2000)
+
+    createFloatingText()
+
     const content = document.getElementById('content')
-
-    // Debug: Check if `content` exists
-    console.log('Content element:', content)
-
-    // Inject spinner
     content.innerHTML = `
         <div class="spinner">
             <p>Getting Crazy...</p>
         </div>
     `
-
-    // Debug: Check if spinner HTML is added
-    console.log('Updated content innerHTML:', content.innerHTML)
-
-    // Delay loading the editor
     setTimeout(() => {
         const randomIndex = Math.floor(Math.random() * images.length)
         const randomImage = images[randomIndex]
-
         loadEditor(randomImage)
-    }, 2000)
+    }, 4000)
 })
 
-
-
-
-
-
 galleryBtn.addEventListener('click', () => {
-    textBlocks = [] // Clear any meme editing state
+    textBlocks = [] 
     selectedTextIndex = -1
     loadGallery()
 })
 
-    // Load the gallery immediately when the page loads
     loadGallery()
 })
 
