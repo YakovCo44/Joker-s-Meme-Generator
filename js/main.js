@@ -122,27 +122,50 @@ document.addEventListener('DOMContentLoaded', () => {
         let selectedTextIndex = -1
     
         img.onload = () => {
-            canvas.width = img.width
-            canvas.height = img.height
+            const maxCanvasWidth = window.innerWidth * 0.9
+            const maxCanvasHeight = window.innerHeight * 0.9
+        
+            const imgAspectRatio = img.width / img.height
+            const canvasAspectRatio = maxCanvasWidth / maxCanvasHeight
+        
+            if (imgAspectRatio > canvasAspectRatio) {
+                canvas.width = maxCanvasWidth
+                canvas.height = maxCanvasWidth / imgAspectRatio
+            } else {
+                canvas.height = maxCanvasHeight
+                canvas.width = maxCanvasHeight * imgAspectRatio
+            }
+        
             drawCanvas()
         }
-    
+        
         function drawCanvas() {
             ctx.clearRect(0, 0, canvas.width, canvas.height)
-            ctx.drawImage(img, 0, 0)
-    
-            textBlocks.forEach((block, index) => {
+        
+            ctx.fillStyle = "black"
+            ctx.fillRect(0, 0, canvas.width, canvas.height)
+        
+            const offsetX = (canvas.width - img.width * (canvas.height / img.height)) / 2
+            const offsetY = (canvas.height - img.height * (canvas.width / img.width)) / 2
+        
+            if (img.width / img.height > canvas.width / canvas.height) {
+                const scaledHeight = canvas.height
+                const scaledWidth = (img.width * canvas.height) / img.height
+                ctx.drawImage(img, (canvas.width - scaledWidth) / 2, 0, scaledWidth, scaledHeight)
+            } else {
+                const scaledWidth = canvas.width
+                const scaledHeight = (img.height * canvas.width) / img.width
+                ctx.drawImage(img, 0, (canvas.height - scaledHeight) / 2, scaledWidth, scaledHeight)
+            }
+      
+            textBlocks.forEach((block) => {
                 ctx.fillStyle = block.color
                 ctx.font = block.font
                 ctx.fillText(block.text, block.x, block.y)
-    
-                if (index === selectedTextIndex) {
-                    const textWidth = ctx.measureText(block.text).width
-                    ctx.strokeStyle = '#ff0000'
-                    ctx.strokeRect(block.x - 5, block.y - 25, textWidth + 10, 30)
-                }
             })
         }
+        
+        
     
         document.getElementById('memeText').addEventListener('input', () => {
             if (selectedTextIndex >= 0) {
@@ -287,23 +310,6 @@ document.addEventListener('DOMContentLoaded', () => {
             modal.remove()
         }, 2000)
     }
-    
-function drawCanvas() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
-    ctx.drawImage(img, 0, 0)
-
-    textBlocks.forEach((block, index) => {
-        ctx.fillStyle = block.color
-        ctx.font = block.font
-        ctx.fillText(block.text, block.x, block.y)
-
-        if (index === selectedTextIndex) {
-            const textWidth = ctx.measureText(block.text).width
-            ctx.strokeStyle = '#ff0000'
-            ctx.strokeRect(block.x - 5, block.y - 25, textWidth + 10, 30)
-        }
-    })
-}
 
 function openAboutModal() {
     const modal = document.createElement('div')
@@ -411,9 +417,5 @@ galleryBtn.addEventListener('click', () => {
 
     loadGallery()
 })
-
-
-
-
 
 

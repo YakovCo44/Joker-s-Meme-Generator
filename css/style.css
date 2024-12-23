@@ -80,12 +80,18 @@ button:hover {
 }
 
 .canvas-container {
-    margin: auto;
-    width: fit-content;
-    border: 5px solid #7a2a8a; 
-    border-radius: 20px;
-    background: rgba(0, 0, 0, 0.8); 
-    padding: 20px;
+    max-width: 100%;
+    height: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden; 
+}
+
+canvas {
+    max-width: 100%;
+    height: auto; 
+    border: 2px solid #50c878; 
 }
 
 .controls input,
@@ -346,6 +352,54 @@ button:hover {
     50% { transform: translate(50px, -50px); opacity: 0.5; }
     100% { transform: translate(-50px, 50px); opacity: 0; }
 }
+
+/* For tablets (768<) */
+@media (max-width: 768px) {
+    .title {
+        font-size: 40px;
+    }
+    .toolbar {
+        flex-direction: column;
+        gap: 10px;
+        padding: 10px;
+    }
+    button {
+        font-size: 16px;
+        padding: 10px 20px;
+    }
+    .gallery-img {
+        width: 150px;
+    }
+}
+
+/* For phones (480>) */
+@media (max-width: 480px) {
+    .title {
+        font-size: 28px;
+        text-align: center;
+    }
+    .toolbar {
+        flex-direction: column;
+        gap: 5px;
+        padding: 5px;
+    }
+    button {
+        font-size: 14px;
+        padding: 8px 15px;
+    }
+    .gallery-img {
+        width: 100px;
+    }
+    .canvas-container {
+        padding: 10px;
+    }
+    .modal-content {
+        padding: 15px;
+        font-size: 14px;
+    }
+}
+
+
 
 
 
