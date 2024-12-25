@@ -149,19 +149,31 @@ document.addEventListener('DOMContentLoaded', () => {
             addTextBlock('New Text', 50, 50)
         })
 
-        document.getElementById('memeText').addEventListener('input', () => {
-            if (selectedTextIndex >= 0) {
-                textBlocks[selectedTextIndex].text = document.getElementById('memeText').value
-                drawCanvas()
-            }
-        })
+        document.getElementById('memeText').addEventListener('input', (e) => {
+    if (selectedTextIndex >= 0) {
+        textBlocks[selectedTextIndex].text = e.target.value
+        drawCanvas()
+    }
+})
 
-        document.getElementById('textColor').addEventListener('input', () => {
-            if (selectedTextIndex >= 0) {
-                textBlocks[selectedTextIndex].color = document.getElementById('textColor').value
-                drawCanvas()
-            }
-        })
+
+        document.getElementById('textColor').addEventListener('input', (e) => {
+    if (selectedTextIndex >= 0) {
+        textBlocks[selectedTextIndex].color = e.target.value
+        drawCanvas()
+    }
+})
+
+        document.getElementById('fontSize').addEventListener('input', (e) => {
+    if (selectedTextIndex >= 0) {
+        const fontSize = `${e.target.value}px`
+        const currentFont = textBlocks[selectedTextIndex].font.split(' ')
+        currentFont[0] = fontSize
+        textBlocks[selectedTextIndex].font = currentFont.join(' ')
+        drawCanvas()
+    }
+})
+
 
         document.getElementById('saveBtn').addEventListener('click', () => {
             const memeImage = canvas.toDataURL('image/png')
@@ -175,23 +187,42 @@ document.addEventListener('DOMContentLoaded', () => {
             showModal('Meme saved successfully!')
         })
 
-        canvas.addEventListener('mousedown', (e) => {
-            const mouseX = e.offsetX
-            const mouseY = e.offsetY
+        canvas.addEventListener('mousemove', (e) => {
+    if (selectedTextIndex >= 0 && isDragging) {
+        textBlocks[selectedTextIndex].x = e.offsetX
+        textBlocks[selectedTextIndex].y = e.offsetY
+        drawCanvas()
+    }
+})
 
-            selectedTextIndex = textBlocks.findIndex(block => {
-                const textWidth = ctx.measureText(block.text).width
-                return (
-                    mouseX >= block.x - 5 &&
-                    mouseX <= block.x + textWidth + 5 &&
-                    mouseY >= block.y - 25 &&
-                    mouseY <= block.y + 5
-                )
-            })
+       canvas.addEventListener('mousedown', (e) => {
+    const mouseX = e.offsetX
+    const mouseY = e.offsetY
 
-            drawCanvas()
-        })
+    // Find the index of the text block under the mouse
+    selectedTextIndex = textBlocks.findIndex(block => {
+        const textWidth = ctx.measureText(block.text).width
+        return (
+            mouseX >= block.x - 5 &&
+            mouseX <= block.x + textWidth + 5 &&
+            mouseY >= block.y - 25 &&
+            mouseY <= block.y + 5
+        )
+    })
 
+    if (selectedTextIndex >= 0) {
+        const selectedBlock = textBlocks[selectedTextIndex]
+
+        // Populate the input fields with the selected block's properties
+        document.getElementById('memeText').value = selectedBlock.text
+        document.getElementById('textColor').value = selectedBlock.color
+        const fontSize = selectedBlock.font.split(' ')[0]
+        document.getElementById('fontSize').value = parseInt(fontSize, 10)
+    }
+
+    drawCanvas()
+})
+        
         canvas.addEventListener('mousemove', (e) => {
             if (selectedTextIndex >= 0) {
                 textBlocks[selectedTextIndex].x = e.offsetX
