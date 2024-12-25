@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'img/7ndgqg.jpg',
     ]
 
-     function loadGallery() {
+    function loadGallery() {
         content.innerHTML = `
             <h1 class="title">Gallery</h1>
             <div id="gallery" class="gallery"></div>
@@ -68,10 +68,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         images.forEach(imgName => {
             const img = document.createElement('img')
-            img.src = `${imgName}`
+            img.src = imgName
             img.alt = 'Meme'
             img.className = 'gallery-img'
-            img.addEventListener('click', () => loadEditor(`${imgName}`))
+            img.addEventListener('click', () => loadEditor(imgName))
             gallery.appendChild(img)
         })
 
@@ -79,7 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
             aboutBtn.addEventListener('click', openAboutModal)
         }
     }
-    
+
     function loadEditor(selectedImage, savedTextBlocks = []) {
         content.innerHTML = `
             <h1 class="title">Meme Editor</h1>
@@ -135,37 +135,6 @@ document.addEventListener('DOMContentLoaded', () => {
             drawCanvas()
         }
 
-    function drawCanvas() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height)
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
-        textBlocks.forEach(block => {
-            ctx.fillStyle = block.color
-            ctx.font = block.font
-            ctx.fillText(block.text, block.x, block.y)
-        })
-    }
-    
-        let isDragging = false
-        let selectedTextIndex = -1
-    
-        img.onload = () => {
-            const maxCanvasWidth = window.innerWidth * 0.9
-            const maxCanvasHeight = window.innerHeight * 0.9
-        
-            const imgAspectRatio = img.width / img.height
-            const canvasAspectRatio = maxCanvasWidth / maxCanvasHeight
-        
-            if (imgAspectRatio > canvasAspectRatio) {
-                canvas.width = maxCanvasWidth
-                canvas.height = maxCanvasWidth / imgAspectRatio
-            } else {
-                canvas.height = maxCanvasHeight
-                canvas.width = maxCanvasHeight * imgAspectRatio
-            }
-        
-            drawCanvas()
-        }
-        
         function drawCanvas() {
             ctx.clearRect(0, 0, canvas.width, canvas.height)
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
@@ -244,8 +213,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    
-     function showModal(message) {
+    function showModal(message) {
         const modal = document.createElement('div')
         modal.className = 'save-modal'
         modal.innerHTML = `
@@ -290,7 +258,8 @@ document.addEventListener('DOMContentLoaded', () => {
             savedGallery.appendChild(memeContainer)
         })
     })
- function openAboutModal() {
+
+    function openAboutModal() {
         const modal = document.createElement('div')
         modal.className = 'modal'
 
@@ -310,97 +279,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     galleryBtn.addEventListener('click', loadGallery)
-
-    loadGallery()
-})
-
-function addTextBlock(text = '', x = 50, y = 50, color = '#ffffff', font = '30px Arial') {
-    textBlocks.push({ text, x, y, color, font })
-    selectedTextIndex = textBlocks.length - 1 
-    drawCanvas()
-}
-    
-document.getElementById('savedBtn').addEventListener('click', () => {
-    content.innerHTML = `
-        <h1 class="title">Saved Memes</h1>
-        <div id="savedGallery" class="gallery"></div>
-    `
-
-    const savedGallery = document.getElementById('savedGallery')
-
-    savedMemes.forEach((meme, index) => {
-        const memeContainer = document.createElement('div')
-        memeContainer.className = 'meme-container'
-
-        const img = document.createElement('img')
-        img.src = meme.image
-        img.alt = `Meme ${index + 1}`
-        img.className = 'gallery-img'
-
-        img.addEventListener('click', () => {
-            loadEditor(meme.image, meme.textBlocks) 
-        })
-
-        memeContainer.appendChild(img)
-        savedGallery.appendChild(memeContainer)
-    })
-
-    const aboutBtn = document.getElementById('aboutBtn')
-    if (aboutBtn) {
-        aboutBtn.addEventListener('click', openAboutModal)
-    }
-})
-
-
-function createFloatingText() {
-    for (let i = 0; i < 10; i++) {
-        const haha = document.createElement('div')
-        haha.className = 'haha'
-        haha.innerText = 'HAHAHA'
-        haha.style.position = 'absolute'
-        haha.style.top = `${Math.random() * window.innerHeight}px`
-        haha.style.left = `${Math.random() * window.innerWidth}px`
-        haha.style.fontSize = `${Math.random() * 30 + 20}px`
-        haha.style.zIndex = '1000'
-        document.body.appendChild(haha)
-
-        setTimeout(() => haha.remove(), 3000)
-    }
-}
-
-document.getElementById('crazyBtn').addEventListener('click', () => {
-    const flashOverlay = document.getElementById('flash-overlay')
-
-    flashOverlay.classList.add('flash')
-
-    const laughSound = new Audio('audio/joker-laugh.mp3')
-    laughSound.play()
-
-    document.body.classList.add('shake')
-    setTimeout(() => {
-        document.body.classList.remove('shake')
-    }, 2000)
-
-    createFloatingText()
-
-    const content = document.getElementById('content')
-    content.innerHTML = `
-        <div class="spinner">
-            <p>Getting Crazy...</p>
-        </div>
-    `
-    setTimeout(() => {
-        const randomIndex = Math.floor(Math.random() * images.length)
-        const randomImage = images[randomIndex]
-        loadEditor(randomImage)
-    }, 4000)
-})
-
-galleryBtn.addEventListener('click', () => {
-    textBlocks = [] 
-    selectedTextIndex = -1
-    loadGallery()
-})
 
     loadGallery()
 })
