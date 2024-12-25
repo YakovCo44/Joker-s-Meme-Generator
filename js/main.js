@@ -116,6 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let textBlocks = [...savedTextBlocks]
         selectedTextIndex = -1
+        let isDragging = false
 
         img.onload = () => {
             const maxCanvasWidth = window.innerWidth * 0.9
@@ -158,12 +159,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 })
 
-
-
-        document.getElementById('textColor').addEventListener('input', (e) => {
+   document.getElementById('textColor').addEventListener('input', (e) => {
     if (selectedTextIndex >= 0) {
         textBlocks[selectedTextIndex].color = e.target.value
         drawCanvas()
+    } else {
+        console.log('No text block selected')
     }
 })
 
@@ -193,19 +194,10 @@ document.addEventListener('DOMContentLoaded', () => {
             showModal('Meme saved successfully!')
         })
 
-        canvas.addEventListener('mousemove', (e) => {
-    if (selectedTextIndex >= 0 && isDragging) {
-        textBlocks[selectedTextIndex].x = e.offsetX
-        textBlocks[selectedTextIndex].y = e.offsetY
-        drawCanvas()
-    }
-})
-
-      canvas.addEventListener('mousedown', (e) => {
+       canvas.addEventListener('mousedown', (e) => {
     const mouseX = e.offsetX
     const mouseY = e.offsetY
 
-    // Find the index of the text block under the mouse
     selectedTextIndex = textBlocks.findIndex(block => {
         const textWidth = ctx.measureText(block.text).width
         return (
@@ -217,30 +209,30 @@ document.addEventListener('DOMContentLoaded', () => {
     })
 
     if (selectedTextIndex >= 0) {
+        isDragging = true
         const selectedBlock = textBlocks[selectedTextIndex]
         document.getElementById('memeText').value = selectedBlock.text
         document.getElementById('textColor').value = selectedBlock.color
         document.getElementById('fontSize').value = parseInt(selectedBlock.font.split(' ')[0], 10)
+    } else {
+        isDragging = false
     }
 
     drawCanvas()
 })
-
         
-       canvas.addEventListener('mousemove', (e) => {
-    if (selectedTextIndex >= 0 && isDragging) {
+     canvas.addEventListener('mousemove', (e) => {
+    if (isDragging && selectedTextIndex >= 0) {
         textBlocks[selectedTextIndex].x = e.offsetX
         textBlocks[selectedTextIndex].y = e.offsetY
         drawCanvas()
-    } else if (!isDragging) {
-        console.log('Mouse is not dragging')
     }
 })
 
-
         canvas.addEventListener('mouseup', () => {
-            selectedTextIndex = -1
-        })
+    isDragging = false
+})
+
 
         document.getElementById('backToGalleryBtn').addEventListener('click', loadGallery)
 
