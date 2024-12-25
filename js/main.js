@@ -148,10 +148,6 @@ document.addEventListener('DOMContentLoaded', () => {
         })
     }
     
-        const ctx = canvas.getContext('2d')
-        const img = new Image()
-        img.src = selectedImage
-    
         let isDragging = false
         let textBlocks = []
         let selectedTextIndex = -1
