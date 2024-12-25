@@ -83,34 +83,70 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
 
-    function loadEditor(selectedImage) {
-        content.innerHTML = `
-            <h1 class="title">Meme Editor</h1>
-            <div class="editor">
-                <div class="canvas-container">
-                    <canvas id="memeCanvas"></canvas>
-                </div>
-                <div class="controls">
-                    <button id="addTextBlockBtn">Add Text Block</button>
-                    <input type="text" id="memeText" placeholder="Enter text">
-                    <input type="color" id="textColor" value="#ffffff">
-                    <select id="fontStyle">
-                     <option value="Arial">Arial</option>
-                     <option value="Courier New">Courier New</option>
-                     <option value="Impact">Impact</option>
-                     <option value="Comic Sans MS">Comic Sans MS</option>
-                     <option value="Times New Roman">Times New Roman</option>
-                    </select>
-                        <input type="number" id="fontSize" placeholder="Font Size" value="30">
-                         <button id="boldBtn">Bold</button>
-                            <button id="italicBtn">Italic</button>
-                            <button id="deleteBtn">Delete Text</button>
-                            <button id="resetBtn">Reset</button>
-                            <button id="saveBtn">Save Meme</button>
-                </div>
+    function loadEditor(selectedImage, savedTextBlocks = []) {
+    content.innerHTML = `
+        <h1 class="title">Meme Editor</h1>
+        <div class="editor">
+            <div class="canvas-container">
+                <canvas id="memeCanvas"></canvas>
             </div>
-            <button id="backToGalleryBtn">Back to Gallery</button>
-        `
+            <div class="controls">
+                <button id="addTextBlockBtn">Add Text Block</button>
+                <input type="text" id="memeText" placeholder="Enter text">
+                <input type="color" id="textColor" value="#ffffff">
+                <select id="fontStyle">
+                    <option value="Arial">Arial</option>
+                    <option value="Courier New">Courier New</option>
+                    <option value="Impact">Impact</option>
+                    <option value="Comic Sans MS">Comic Sans MS</option>
+                    <option value="Times New Roman">Times New Roman</option>
+                </select>
+                <input type="number" id="fontSize" placeholder="Font Size" value="30">
+                <button id="boldBtn">Bold</button>
+                <button id="italicBtn">Italic</button>
+                <button id="deleteBtn">Delete Text</button>
+                <button id="resetBtn">Reset</button>
+                <button id="saveBtn">Save Meme</button>
+            </div>
+        </div>
+        <button id="backToGalleryBtn">Back to Gallery</button>
+    `
+    
+    const canvas = document.getElementById('memeCanvas')
+    const ctx = canvas.getContext('2d')
+    const img = new Image()
+    img.src = selectedImage
+
+    let textBlocks = [...savedTextBlocks] 
+    let selectedTextIndex = -1
+
+    img.onload = () => {
+        const maxCanvasWidth = window.innerWidth * 0.9
+        const maxCanvasHeight = window.innerHeight * 0.9
+
+        const imgAspectRatio = img.width / img.height
+        const canvasAspectRatio = maxCanvasWidth / maxCanvasHeight
+
+        if (imgAspectRatio > canvasAspectRatio) {
+            canvas.width = maxCanvasWidth
+            canvas.height = maxCanvasWidth / imgAspectRatio
+        } else {
+            canvas.height = maxCanvasHeight
+            canvas.width = maxCanvasHeight * imgAspectRatio
+        }
+
+        drawCanvas()
+    }
+
+    function drawCanvas() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+        textBlocks.forEach(block => {
+            ctx.fillStyle = block.color
+            ctx.font = block.font
+            ctx.fillText(block.text, block.x, block.y)
+        })
+    }
     
         const canvas = document.getElementById('memeCanvas')
         const ctx = canvas.getContext('2d')
@@ -355,6 +391,10 @@ document.getElementById('savedBtn').addEventListener('click', () => {
         img.alt = `Meme ${index + 1}`
         img.className = 'gallery-img'
 
+        img.addEventListener('click', () => {
+            loadEditor(meme.image, meme.textBlocks) 
+        })
+
         memeContainer.appendChild(img)
         savedGallery.appendChild(memeContainer)
     })
@@ -364,6 +404,7 @@ document.getElementById('savedBtn').addEventListener('click', () => {
         aboutBtn.addEventListener('click', openAboutModal)
     }
 })
+
 
 function createFloatingText() {
     for (let i = 0; i < 10; i++) {
