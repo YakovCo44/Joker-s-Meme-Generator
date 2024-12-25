@@ -149,7 +149,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
         let isDragging = false
-        let textBlocks = []
         let selectedTextIndex = -1
     
         img.onload = () => {
