@@ -148,7 +148,6 @@ document.addEventListener('DOMContentLoaded', () => {
         })
     }
     
-        const canvas = document.getElementById('memeCanvas')
         const ctx = canvas.getContext('2d')
         const img = new Image()
         img.src = selectedImage
