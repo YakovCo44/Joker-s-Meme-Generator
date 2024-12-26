@@ -6,7 +6,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const savedMemes = []
     localStorage.setItem('savedMemes', JSON.stringify(savedMemes))
 
-    let textBlocks = []
     let selectedTextIndex = -1
 
     const images = [
@@ -62,36 +61,70 @@ document.addEventListener('DOMContentLoaded', () => {
     ]
 
     function loadGallery() {
-        content.innerHTML = 
+        content.innerHTML = `
             <h1 class="title">Gallery</h1>
             <div id="gallery" class="gallery"></div>
-        
+        `
         const gallery = document.getElementById('gallery')
     
+        const uploadDiv = document.createElement('div')
+        uploadDiv.className = 'upload-image-container'
+        uploadDiv.innerHTML = `
+             <label for="uploadImageInput" class="upload-label">
+                  <div class="upload-placeholder">Upload Image</div>
+            </label>
+             <input type="file" id="uploadImageInput" class="upload-input" accept="image/*" style="display:none">
+            `
+        gallery.appendChild(uploadDiv)
+
+        const uploadInput = document.getElementById('uploadImageInput')
+        uploadInput.addEventListener('change', handleImageUpload)
+
         images.forEach(imgName => {
-            const img = document.createElement('img')
-            img.src = ${imgName}
-            img.alt = 'Joker Meme'
-            img.className = 'gallery-img'
-            img.addEventListener('click', () => loadEditor(${imgName}))
-            gallery.appendChild(img)
+          const img = document.createElement('img')
+          img.src = `${imgName}`
+          img.alt = 'Joker Meme'
+          img.className = 'gallery-img'
+          img.addEventListener('click', () => loadEditor(`${imgName}`))
+          gallery.appendChild(img)
         })
+
     
         const aboutBtn = document.getElementById('aboutBtn')
         if (aboutBtn) {
             aboutBtn.addEventListener('click', openAboutModal)
         }
     }
-    
 
+    function handleImageUpload(event) {
+        const file = event.target.files[0]
+        if (file) {
+            const reader = new FileReader()
+            reader.onload = () => {
+                const uploadedImageUrl = reader.result
+    
+                const img = document.createElement('img')
+                img.src = uploadedImageUrl
+                img.alt = 'Uploaded Meme'
+                img.className = 'gallery-img'
+                img.addEventListener('click', () => loadEditor(uploadedImageUrl))
+    
+                const gallery = document.getElementById('gallery')
+                gallery.insertBefore(img, gallery.children[1])
+            }
+            reader.readAsDataURL(file)
+        }
+    }
+    
     function loadEditor(selectedImage) {
-        content.innerHTML = 
+        content.innerHTML = `
             <h1 class="title">Meme Editor</h1>
             <div class="editor">
                 <div class="canvas-container">
                     <canvas id="memeCanvas"></canvas>
                 </div>
                 <div class="controls">
+                    <button id="addTextBlockBtn">Add Text Block</button>
                     <input type="text" id="memeText" placeholder="Enter text">
                     <input type="color" id="textColor" value="#ffffff">
                     <select id="fontStyle">
@@ -106,12 +139,15 @@ document.addEventListener('DOMContentLoaded', () => {
                             <button id="italicBtn">Italic</button>
                             <button id="deleteBtn">Delete Text</button>
                             <button id="resetBtn">Reset</button>
-                            <button id="addTextBlockBtn">Add Text Block</button>
                             <button id="saveBtn">Save Meme</button>
+                            <button id = "shareFacebookBtn" class="facebook-share-btn">
+                                <img src ="img/facebook-logo.png" alt="Facebook Logo" class="facebook-logo">
+                                Share to Facebook
+                            </button>
                 </div>
             </div>
             <button id="backToGalleryBtn">Back to Gallery</button>
-        
+        `
     
         const canvas = document.getElementById('memeCanvas')
         const ctx = canvas.getContext('2d')
@@ -123,28 +159,56 @@ document.addEventListener('DOMContentLoaded', () => {
         let selectedTextIndex = -1
     
         img.onload = () => {
-            canvas.width = img.width
-            canvas.height = img.height
+            const maxCanvasWidth = window.innerWidth * 0.9
+            const maxCanvasHeight = window.innerHeight * 0.9
+        
+            const imgAspectRatio = img.width / img.height
+            const canvasAspectRatio = maxCanvasWidth / maxCanvasHeight
+        
+            if (imgAspectRatio > canvasAspectRatio) {
+                canvas.width = maxCanvasWidth
+                canvas.height = maxCanvasWidth / imgAspectRatio
+            } else {
+                canvas.height = maxCanvasHeight
+                canvas.width = maxCanvasHeight * imgAspectRatio
+            }
+        
             drawCanvas()
         }
-    
+        
         function drawCanvas() {
             ctx.clearRect(0, 0, canvas.width, canvas.height)
-            ctx.drawImage(img, 0, 0)
-    
+        
+            if (img.complete && img.naturalHeight !== 0) {
+                const imgAspectRatio = img.width / img.height
+                const canvasAspectRatio = canvas.width / canvas.height
+        
+                if (imgAspectRatio > canvasAspectRatio) {
+                    const scaledHeight = canvas.height
+                    const scaledWidth = (img.width * canvas.height) / img.height
+                    ctx.drawImage(img, (canvas.width - scaledWidth) / 2, 0, scaledWidth, scaledHeight)
+                } else {
+                    const scaledWidth = canvas.width
+                    const scaledHeight = (img.height * canvas.width) / img.width
+                    ctx.drawImage(img, 0, (canvas.height - scaledHeight) / 2, scaledWidth, scaledHeight)
+                }
+            }
+        
             textBlocks.forEach((block, index) => {
                 ctx.fillStyle = block.color
                 ctx.font = block.font
                 ctx.fillText(block.text, block.x, block.y)
-    
+        
                 if (index === selectedTextIndex) {
                     const textWidth = ctx.measureText(block.text).width
                     ctx.strokeStyle = '#ff0000'
                     ctx.strokeRect(block.x - 5, block.y - 25, textWidth + 10, 30)
                 }
+        
+                console.log('drawCanvas:', { text: block.text, x: block.x, y: block.y, index })
             })
-        }
-    
+        }        
+
         document.getElementById('memeText').addEventListener('input', () => {
             if (selectedTextIndex >= 0) {
                 textBlocks[selectedTextIndex].text = document.getElementById('memeText').value
@@ -161,6 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         document.getElementById('backToGalleryBtn').addEventListener('click', loadGallery)
         document.getElementById('aboutBtn').addEventListener('click', openAboutModal)
+        document.getElementById('shareFacebookBtn').addEventListener('click', shareToFacebook)
     
         document.getElementById('addTextBlockBtn').addEventListener('click', () => {
             addTextBlock('New Text', 50, 50)
@@ -170,7 +235,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         document.getElementById('fontSize').addEventListener('input', (e) => {
             if (selectedTextIndex >= 0) {
-                textBlocks[selectedTextIndex].font = ${e.target.value}px Arial 
+                textBlocks[selectedTextIndex].font = `${e.target.value}px Arial` 
                 drawCanvas()
             }
         })
@@ -178,7 +243,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('fontStyle').addEventListener('change', (e) => {
             if (selectedTextIndex >= 0) {
                 const fontSize = textBlocks[selectedTextIndex].font.split(' ')[0] 
-                textBlocks[selectedTextIndex].font = ${fontSize} ${e.target.value}
+                textBlocks[selectedTextIndex].font = `${fontSize} ${e.target.value}`
                 drawCanvas()
             }
         })
@@ -217,53 +282,79 @@ document.addEventListener('DOMContentLoaded', () => {
             drawCanvas()
         })
         
-    
         canvas.addEventListener('mousedown', (e) => {
-            const mouseX = e.offsetX
-            const mouseY = e.offsetY
+            // Normalize mouse coordinates to account for canvas scaling
+            const rect = canvas.getBoundingClientRect()
+            const mouseX = (e.clientX - rect.left) * (canvas.width / rect.width)
+            const mouseY = (e.clientY - rect.top) * (canvas.height / rect.height)
         
-            selectedTextIndex = textBlocks.findIndex(block => {
+            // Find the clicked text block
+            selectedTextIndex = textBlocks.findIndex((block, index) => {
                 const textWidth = ctx.measureText(block.text).width
-                return (
-                    mouseX >= block.x - 5 &&
-                    mouseX <= block.x + textWidth + 5 &&
-                    mouseY >= block.y - 25 &&
-                    mouseY <= block.y + 5
+                const textHeight = parseInt(block.font, 10) // Extract font size
+                const padding = 5
+                const isInsideBlock = (
+                    mouseX >= block.x - padding &&
+                    mouseX <= block.x + textWidth + padding &&
+                    mouseY >= block.y - textHeight - padding &&
+                    mouseY <= block.y + padding
                 )
+                console.log(`Checking Block ${index}:`, { isInsideBlock })
+                return isInsideBlock
             })
-
+        
+            console.log('Selected Text Index:', selectedTextIndex)
+        
             if (selectedTextIndex >= 0) {
                 isDragging = true
                 const selectedBlock = textBlocks[selectedTextIndex]
+                console.log('Selected Block:', selectedBlock)
+        
+                // Populate controls with the selected block's properties
                 document.getElementById('memeText').value = selectedBlock.text
                 document.getElementById('textColor').value = selectedBlock.color
+                document.getElementById('fontSize').value = parseInt(selectedBlock.font, 10)
+                const fontParts = selectedBlock.font.split(' ')
+                document.getElementById('fontStyle').value = fontParts[fontParts.length - 1]
+            } else {
+                console.log('No block selected')
+                selectedTextIndex = -1
             }
         
             drawCanvas()
-        })
+        })                      
         
-    
         canvas.addEventListener('mousemove', (e) => {
             if (isDragging && selectedTextIndex >= 0) {
-                textBlocks[selectedTextIndex].x = e.offsetX
-                textBlocks[selectedTextIndex].y = e.offsetY
+                const block = textBlocks[selectedTextIndex]
+                block.x = e.offsetX
+                block.y = e.offsetY
+        
+                console.log('mousemove:', { x: block.x, y: block.y, text: block.text })
                 drawCanvas()
             }
-        })
+        })        
+        
+        canvas.addEventListener('mouseup', () => {
+            if (isDragging) {
+                console.log('mouseup: Stopped dragging')
+                isDragging = false
+            }
+        })                
 
         document.getElementById('saveBtn').addEventListener('click', () => {
-            const memeImage = canvas.toDataURL('image/png')
-        
-            savedMemes.push({
-                image: memeImage,
-                textBlocks: [...textBlocks] 
-            })
+            const memeData = {
+                image: canvas.toDataURL('image/png'), 
+                textBlocks: [...textBlocks], 
+                canvasWidth: canvas.width, 
+                canvasHeight: canvas.height
+            }
+    
+            const savedMemes = JSON.parse(localStorage.getItem('savedMemes')) || []
+            savedMemes.push(memeData);
+            localStorage.setItem('savedMemes', JSON.stringify(savedMemes))
         
             showModal('Meme saved successfully!')
-        })
-    
-        canvas.addEventListener('mouseup', () => {
-            isDragging = false
         })
     
         function addTextBlock(text = '', x = 50, y = 50, color = '#ffffff', font = '30px Arial') {
@@ -273,53 +364,43 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    function shareToFacebook() {
+        const canvas = document.getElementById('memeCanvas')
+        const dataUrl = canvas.toDataURL('image/png') 
     
+        const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(dataUrl)}`
+        window.open(facebookUrl, '_blank')
+    }    
+
     function showModal(message) {
         const modal = document.createElement('div')
         modal.className = 'save-modal'
-        modal.innerHTML = 
+        modal.innerHTML = `
             <div class="modal-content">
                 <p>${message}</p>
             </div>
-        
+        `
         document.body.appendChild(modal)
     
         setTimeout(() => {
             modal.remove()
         }, 2000)
     }
-    
-function drawCanvas() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
-    ctx.drawImage(img, 0, 0)
-
-    textBlocks.forEach((block, index) => {
-        ctx.fillStyle = block.color
-        ctx.font = block.font
-        ctx.fillText(block.text, block.x, block.y)
-
-        if (index === selectedTextIndex) {
-            const textWidth = ctx.measureText(block.text).width
-            ctx.strokeStyle = '#ff0000'
-            ctx.strokeRect(block.x - 5, block.y - 25, textWidth + 10, 30)
-        }
-    })
-}
-
-
 
 function openAboutModal() {
     const modal = document.createElement('div')
     modal.className = 'modal'
 
-    modal.innerHTML = 
+    modal.innerHTML = `
         <div class="modal-content">
             <span class="close-btn">&times;</span>
-            <h1 class="title">About</h1>
+            <h1 class="title">If you want to know more...</h1>
             <p>HA HA HA! This is a Joker-themed meme generator. Select a template and start making fun of Batsy and his Super-Friends!</p>
         </div>
-    
+    `
     document.body.appendChild(modal)
+
+    modal.scrollIntoView({ behavior: 'smooth', block: 'center' })
 
     const closeBtn = modal.querySelector('.close-btn')
     closeBtn.addEventListener('click', () => {
@@ -332,32 +413,15 @@ function addTextBlock(text = '', x = 50, y = 50, color = '#ffffff', font = '30px
     selectedTextIndex = textBlocks.length - 1 
     drawCanvas()
 }
-
-function drawCanvas() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
-    ctx.drawImage(img, 0, 0)
-
-    textBlocks.forEach((block, index) => {
-        ctx.fillStyle = block.color
-        ctx.font = block.font
-        ctx.fillText(block.text, block.x, block.y)
-
-        if (index === selectedTextIndex) {
-            const textWidth = ctx.measureText(block.text).width
-            ctx.strokeStyle = '#ff0000' 
-            ctx.strokeRect(block.x - 5, block.y - 25, textWidth + 10, 30)
-        }
-    })
-}
-    
     
 document.getElementById('savedBtn').addEventListener('click', () => {
-    content.innerHTML = 
+    content.innerHTML = `
         <h1 class="title">Saved Memes</h1>
         <div id="savedGallery" class="gallery"></div>
-    
+    `
 
     const savedGallery = document.getElementById('savedGallery')
+    const savedMemes = JSON.parse(localStorage.getItem('savedMemes')) || []
 
     savedMemes.forEach((meme, index) => {
         const memeContainer = document.createElement('div')
@@ -365,43 +429,279 @@ document.getElementById('savedBtn').addEventListener('click', () => {
 
         const img = document.createElement('img')
         img.src = meme.image
-        img.alt = Meme ${index + 1}
+        img.alt = `Meme ${index + 1}`
         img.className = 'gallery-img'
 
+        const reEditBtn = document.createElement('button')
+        reEditBtn.textContent = 'Re-Edit'
+        reEditBtn.className = 're-edit-btn'
+        reEditBtn.addEventListener('click', () => loadEditorForReEdit(meme))
+
         memeContainer.appendChild(img)
+        memeContainer.appendChild(reEditBtn)
         savedGallery.appendChild(memeContainer)
     })
 
     const aboutBtn = document.getElementById('aboutBtn')
-    if (aboutBtn) {
-        aboutBtn.addEventListener('click', openAboutModal)
-    }
+    if (aboutBtn) aboutBtn.addEventListener('click', openAboutModal)
 })
+
+function loadEditorForReEdit(meme) {
+    content.innerHTML = `
+        <h1 class="title">Meme Editor</h1>
+        <div class="editor">
+            <div class="canvas-container">
+                <canvas id="memeCanvas"></canvas>
+            </div>
+            <div class="controls">
+                <button id="addTextBlockBtn">Add Text Block</button>
+                <input type="text" id="memeText" placeholder="Enter text">
+                <input type="color" id="textColor" value="#ffffff">
+                <select id="fontStyle">
+                    <option value="Arial">Arial</option>
+                    <option value="Courier New">Courier New</option>
+                    <option value="Impact">Impact</option>
+                    <option value="Comic Sans MS">Comic Sans MS</option>
+                    <option value="Times New Roman">Times New Roman</option>
+                </select>
+                <input type="number" id="fontSize" placeholder="Font Size" value="30">
+                <button id="boldBtn">Bold</button>
+                <button id="italicBtn">Italic</button>
+                <button id="deleteBtn">Delete Text</button>
+                <button id="resetBtn">Reset</button>
+                <button id="saveBtn">Save Meme</button>
+            </div>
+        </div>
+        <button id="backToGalleryBtn">Back to Gallery</button>
+    `
+
+    const canvas = document.getElementById('memeCanvas')
+    const ctx = canvas.getContext('2d')
+    canvas.width = meme.canvasWidth
+    canvas.height = meme.canvasHeight
+
+    const img = new Image()
+    img.src = meme.image
+    let isDragging = false
+    let selectedTextIndex = -1
+
+    textBlocks = meme.textBlocks.map(block => ({
+        text: block.text || '',
+        x: block.x * (canvas.width / meme.canvasWidth),
+        y: block.y * (canvas.height / meme.canvasHeight),
+        font: block.font || '30px Arial',
+        color: block.color || '#ffffff',
+    }))
+    
+    console.log('Restored Text Blocks (Normalized):', textBlocks)
+        
+    
+    // Normalize coordinates to the current canvas size
+    textBlocks.forEach(block => {
+    block.x = block.x * (canvas.width / meme.canvasWidth)
+    block.y = block.y * (canvas.height / meme.canvasHeight)
+    })
+
+    img.onload = () => {
+        drawCanvas()
+    }
+
+    function drawCanvas() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+    
+        if (img.complete && img.naturalHeight !== 0) {
+            const imgAspectRatio = img.width / img.height
+            const canvasAspectRatio = canvas.width / canvas.height
+    
+            if (imgAspectRatio > canvasAspectRatio) {
+                const scaledHeight = canvas.height
+                const scaledWidth = (img.width * canvas.height) / img.height
+                ctx.drawImage(img, (canvas.width - scaledWidth) / 2, 0, scaledWidth, scaledHeight)
+            } else {
+                const scaledWidth = canvas.width
+                const scaledHeight = (img.height * canvas.width) / img.width
+                ctx.drawImage(img, 0, (canvas.height - scaledHeight) / 2, scaledWidth, scaledHeight)
+            }
+        }
+    
+        textBlocks.forEach((block, index) => {
+            ctx.fillStyle = block.color
+            ctx.font = block.font
+            ctx.fillText(block.text, block.x, block.y)
+    
+            if (index === selectedTextIndex) {
+                const textWidth = ctx.measureText(block.text).width
+                ctx.strokeStyle = '#ff0000'
+                ctx.strokeRect(block.x - 5, block.y - 25, textWidth + 10, 30)
+            }
+        })
+    }       
+
+    function addTextBlock(text = '', x = 50, y = 50, color = '#ffffff', font = '30px Arial') {
+        textBlocks.push({ text, x, y, color, font })
+        selectedTextIndex = textBlocks.length - 1
+        drawCanvas()
+    }
+
+    canvas.addEventListener('mousedown', (e) => {
+        const rect = canvas.getBoundingClientRect()
+        const mouseX = (e.clientX - rect.left) * (canvas.width / rect.width)
+        const mouseY = (e.clientY - rect.top) * (canvas.height / rect.height)
+    
+        console.log('Mouse Position:', { mouseX, mouseY })
+    
+        // Log all blocks for debugging
+        textBlocks.forEach((block, index) => {
+            const textWidth = ctx.measureText(block.text).width
+            const textHeight = parseInt(block.font, 10)
+            const isInsideBlock = (
+                mouseX >= block.x - 5 &&
+                mouseX <= block.x + textWidth + 5 &&
+                mouseY >= block.y - textHeight - 5 &&
+                mouseY <= block.y + 5
+            )
+    
+            console.log(`Block ${index}:`, {
+                x: block.x,
+                y: block.y,
+                textWidth,
+                textHeight,
+                isInsideBlock,
+            })
+        })
+    
+        // Find the clicked block
+        selectedTextIndex = textBlocks.findIndex(block => {
+            const textWidth = ctx.measureText(block.text).width
+            const textHeight = parseInt(block.font, 10)
+            return (
+                mouseX >= block.x - 5 &&
+                mouseX <= block.x + textWidth + 5 &&
+                mouseY >= block.y - textHeight - 5 &&
+                mouseY <= block.y + 5
+            )
+        })
+    
+        console.log('Selected Text Index:', selectedTextIndex)
+    
+        if (selectedTextIndex >= 0) {
+            const selectedBlock = textBlocks[selectedTextIndex]
+            console.log('Selected Block:', selectedBlock)
+    
+            // Populate controls with selected block's properties
+            document.getElementById('memeText').value = selectedBlock.text
+            document.getElementById('textColor').value = selectedBlock.color
+            document.getElementById('fontSize').value = parseInt(selectedBlock.font, 10)
+            const fontParts = selectedBlock.font.split(' ')
+            document.getElementById('fontStyle').value = fontParts[fontParts.length - 1]
+    
+            isDragging = true
+        } else {
+            console.log('No block selected')
+            selectedTextIndex = -1
+            isDragging = false
+        }
+    
+        drawCanvas()
+    })    
+    
+    canvas.addEventListener('mousemove', (e) => {
+        if (isDragging && selectedTextIndex >= 0) {
+            const rect = canvas.getBoundingClientRect()
+            const mouseX = (e.clientX - rect.left) * (canvas.width / rect.width)
+            const mouseY = (e.clientY - rect.top) * (canvas.height / rect.height)
+    
+            // Ensure we are updating the same block
+            textBlocks[selectedTextIndex].x = mouseX
+            textBlocks[selectedTextIndex].y = mouseY
+    
+            console.log('Moved Block:', textBlocks[selectedTextIndex])
+    
+            drawCanvas()
+        }
+    })
+        
+    
+    canvas.addEventListener('mouseup', () => {
+        if (isDragging) {
+            console.log('Stopped dragging:', textBlocks[selectedTextIndex])
+            isDragging = false
+        }
+    })                
+
+    attachEditorEventListeners(drawCanvas, addTextBlock)
+
+    document.getElementById('backToGalleryBtn').addEventListener('click', loadGallery)
+}
+
+function attachEditorEventListeners(drawCanvas, addTextBlock) {
+    document.getElementById('memeText').addEventListener('input', () => {
+        if (selectedTextIndex >= 0) {
+            textBlocks[selectedTextIndex].text = document.getElementById('memeText').value
+            console.log('Updated Text:', textBlocks[selectedTextIndex])
+            drawCanvas()
+        } else {
+            console.log('No block selected for text update')
+        }
+    })
+
+    document.getElementById('textColor').addEventListener('input', () => {
+        if (selectedTextIndex >= 0) {
+            textBlocks[selectedTextIndex].color = document.getElementById('textColor').value
+            console.log('Updated Color:', textBlocks[selectedTextIndex])
+            drawCanvas()
+        } else {
+            console.log('No block selected for color update')
+        }
+    })
+
+    document.getElementById('fontSize').addEventListener('input', (e) => {
+        if (selectedTextIndex >= 0) {
+            const fontSize = e.target.value
+            const fontParts = textBlocks[selectedTextIndex].font.split(' ')
+            const fontStyle = fontParts.slice(1).join(' ')
+            textBlocks[selectedTextIndex].font = `${fontSize}px ${fontStyle}`
+            console.log('Updated Font Size:', textBlocks[selectedTextIndex])
+            drawCanvas()
+        } else {
+            console.log('No block selected for font size update')
+        }
+    })
+
+    document.getElementById('fontStyle').addEventListener('change', (e) => {
+        if (selectedTextIndex >= 0) {
+            const fontStyle = e.target.value
+            const fontParts = textBlocks[selectedTextIndex].font.split(' ')
+            const fontSize = fontParts[0]
+            textBlocks[selectedTextIndex].font = `${fontSize} ${fontStyle}`
+            console.log('Updated Font Style:', textBlocks[selectedTextIndex])
+            drawCanvas()
+        } else {
+            console.log('No block selected for font style update')
+        }
+    })
+}
 
 function createFloatingText() {
     for (let i = 0; i < 10; i++) {
         const haha = document.createElement('div')
         haha.className = 'haha'
         haha.innerText = 'HAHAHA'
-        haha.style.top = ${Math.random() * window.innerHeight}px
-        haha.style.left = ${Math.random() * window.innerWidth}px
-        haha.style.fontSize = ${Math.random() * 30 + 20}px
+        haha.style.position = 'absolute'
+        haha.style.top = `${Math.random() * window.innerHeight}px`
+        haha.style.left = `${Math.random() * window.innerWidth}px`
+        haha.style.fontSize = `${Math.random() * 30 + 20}px`
+        haha.style.zIndex = '1000'
         document.body.appendChild(haha)
 
         setTimeout(() => haha.remove(), 3000)
     }
 }
 
-
-
 document.getElementById('crazyBtn').addEventListener('click', () => {
     const flashOverlay = document.getElementById('flash-overlay')
 
     flashOverlay.classList.add('flash')
-
-    setTimeout(() => {
-        flashOverlay.classList.remove('flash')
-    }, 4000)
 
     const laughSound = new Audio('audio/joker-laugh.mp3')
     laughSound.play()
@@ -411,31 +711,20 @@ document.getElementById('crazyBtn').addEventListener('click', () => {
         document.body.classList.remove('shake')
     }, 2000)
 
-    // Display spinner and load random image
+    createFloatingText()
+
     const content = document.getElementById('content')
-    content.innerHTML = 
+    content.innerHTML = `
         <div class="spinner">
             <p>Getting Crazy...</p>
         </div>
-    
+    `
     setTimeout(() => {
         const randomIndex = Math.floor(Math.random() * images.length)
         const randomImage = images[randomIndex]
         loadEditor(randomImage)
     }, 4000)
 })
-
-function shakeEffect() {
-    const interval = setInterval(() => {
-        document.body.style.transform = translate(${Math.random() * 10 - 5}px, ${Math.random() * 10 - 5}px)
-    }, 50)
-
-    setTimeout(() => {
-        clearInterval(interval)
-        document.body.style.transform = 'translate(0, 0)'
-    }, 500)
-}
-
 
 galleryBtn.addEventListener('click', () => {
     textBlocks = [] 
@@ -445,3 +734,9 @@ galleryBtn.addEventListener('click', () => {
 
     loadGallery()
 })
+
+
+
+
+
+
