@@ -140,6 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <button id="deleteBtn">Delete Text</button>
                             <button id="resetBtn">Reset</button>
                             <button id="saveBtn">Save Meme</button>
+                            <button id="downloadBtn">Download Meme</button>
                             <button id = "shareFacebookBtn" class="facebook-share-btn">
                                 <img src ="img/facebook-logo.png" alt="Facebook Logo" class="facebook-logo">
                                 Share to Facebook
@@ -225,6 +226,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         document.getElementById('backToGalleryBtn').addEventListener('click', loadGallery)
         document.getElementById('aboutBtn').addEventListener('click', openAboutModal)
+        document.getElementById('downloadBtn').addEventListener('click', downloadMeme)
         document.getElementById('shareFacebookBtn').addEventListener('click', shareToFacebook)
     
         document.getElementById('addTextBlockBtn').addEventListener('click', () => {
@@ -362,6 +364,14 @@ document.addEventListener('DOMContentLoaded', () => {
             selectedTextIndex = textBlocks.length - 1
             drawCanvas()
         }
+    }
+
+    function downloadMeme() {
+        const canvas = document.getElementById('memeCanvas') 
+        const link = document.createElement('a') 
+        link.download = 'meme.png' 
+        link.href = canvas.toDataURL('image/png') 
+        link.click() 
     }
 
     function shareToFacebook() {
