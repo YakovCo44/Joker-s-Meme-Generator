@@ -71,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
         uploadDiv.className = 'upload-image-container'
         uploadDiv.innerHTML = `
              <label for="uploadImageInput" class="upload-label">
-                  <div class="upload-placeholder">Upload Image</div>
+                  <div class="upload-placeholder">Think you are crazier than I am?</div>
             </label>
              <input type="file" id="uploadImageInput" class="upload-input" accept="image/*" style="display:none">
             `
