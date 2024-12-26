@@ -115,7 +115,39 @@ document.addEventListener('DOMContentLoaded', () => {
             reader.readAsDataURL(file)
         }
     }
+
+    function shareToFacebook() {
+        const canvas = document.getElementById('memeCanvas')
+        const dataUrl = canvas.toDataURL('image/png')
     
+        fetch(dataUrl)
+            .then(response => response.blob())
+            .then(blob => {
+                const formData = new FormData()
+                formData.append('file', blob)
+                formData.append('upload_preset', 'unsigned_upload')
+    
+                return fetch(`https://api.cloudinary.com/v1_1/dpuyrzrdd/image/upload`, {
+                    method: 'POST',
+                    body: formData,
+                })
+            })
+            .then(response => response.json())
+            .then(uploadResult => {
+                const publicUrl = uploadResult.secure_url
+                console.log('Uploaded Image URL:', publicUrl)
+    
+                const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(publicUrl)}`
+                console.log('Facebook Sharing URL:', facebookUrl)
+    
+                window.open(facebookUrl, '_blank')
+            })
+            .catch(error => {
+                console.error('Error sharing to Facebook:', error)
+                alert('Failed to share. Please try again.')
+            })
+    }
+      
     function loadEditor(selectedImage) {
         content.innerHTML = `
             <h1 class="title">Meme Editor</h1>
@@ -141,7 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <button id="resetBtn">Reset</button>
                             <button id="saveBtn">Save Meme</button>
                             <button id="downloadBtn">Download Meme</button>
-                            <button id = "shareFacebookBtn" class="facebook-share-btn">
+                            <button id="shareFacebookBtn" class="facebook-share-btn">
                                 <img src ="img/facebook-logo.png" alt="Facebook Logo" class="facebook-logo">
                                 Share to Facebook
                             </button>
@@ -166,14 +198,25 @@ document.addEventListener('DOMContentLoaded', () => {
             const imgAspectRatio = img.width / img.height
             const canvasAspectRatio = maxCanvasWidth / maxCanvasHeight
         
-            if (imgAspectRatio > canvasAspectRatio) {
-                canvas.width = maxCanvasWidth
-                canvas.height = maxCanvasWidth / imgAspectRatio
+            const isMobile = window.innerWidth <= 480
+            const isTablet = window.innerWidth > 480 && window.innerWidth <= 1024
+            
+            if (isMobile) {
+                canvas.width = maxCanvasWidth * 0.9 
+                canvas.height = canvas.width / imgAspectRatio
+            } else if (isTablet) {
+                canvas.width = maxCanvasWidth * 0.8 
+                canvas.height = canvas.width / imgAspectRatio
             } else {
-                canvas.height = maxCanvasHeight
-                canvas.width = maxCanvasHeight * imgAspectRatio
-            }
-        
+                if (imgAspectRatio > canvasAspectRatio) {
+                    canvas.width = maxCanvasWidth
+                    canvas.height = maxCanvasWidth / imgAspectRatio
+                } else {
+                    canvas.height = maxCanvasHeight
+                    canvas.width = maxCanvasHeight * imgAspectRatio
+                }
+            }            
+            
             drawCanvas()
         }
         
@@ -285,15 +328,13 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         
         canvas.addEventListener('mousedown', (e) => {
-            // Normalize mouse coordinates to account for canvas scaling
             const rect = canvas.getBoundingClientRect()
             const mouseX = (e.clientX - rect.left) * (canvas.width / rect.width)
             const mouseY = (e.clientY - rect.top) * (canvas.height / rect.height)
         
-            // Find the clicked text block
             selectedTextIndex = textBlocks.findIndex((block, index) => {
                 const textWidth = ctx.measureText(block.text).width
-                const textHeight = parseInt(block.font, 10) // Extract font size
+                const textHeight = parseInt(block.font, 10) 
                 const padding = 5
                 const isInsideBlock = (
                     mouseX >= block.x - padding &&
@@ -312,7 +353,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const selectedBlock = textBlocks[selectedTextIndex]
                 console.log('Selected Block:', selectedBlock)
         
-                // Populate controls with the selected block's properties
                 document.getElementById('memeText').value = selectedBlock.text
                 document.getElementById('textColor').value = selectedBlock.color
                 document.getElementById('fontSize').value = parseInt(selectedBlock.font, 10)
@@ -505,8 +545,6 @@ function loadEditorForReEdit(meme) {
     
     console.log('Restored Text Blocks (Normalized):', textBlocks)
         
-    
-    // Normalize coordinates to the current canvas size
     textBlocks.forEach(block => {
     block.x = block.x * (canvas.width / meme.canvasWidth)
     block.y = block.y * (canvas.height / meme.canvasHeight)
@@ -560,7 +598,6 @@ function loadEditorForReEdit(meme) {
     
         console.log('Mouse Position:', { mouseX, mouseY })
     
-        // Log all blocks for debugging
         textBlocks.forEach((block, index) => {
             const textWidth = ctx.measureText(block.text).width
             const textHeight = parseInt(block.font, 10)
@@ -580,7 +617,6 @@ function loadEditorForReEdit(meme) {
             })
         })
     
-        // Find the clicked block
         selectedTextIndex = textBlocks.findIndex(block => {
             const textWidth = ctx.measureText(block.text).width
             const textHeight = parseInt(block.font, 10)
@@ -598,7 +634,6 @@ function loadEditorForReEdit(meme) {
             const selectedBlock = textBlocks[selectedTextIndex]
             console.log('Selected Block:', selectedBlock)
     
-            // Populate controls with selected block's properties
             document.getElementById('memeText').value = selectedBlock.text
             document.getElementById('textColor').value = selectedBlock.color
             document.getElementById('fontSize').value = parseInt(selectedBlock.font, 10)
@@ -621,7 +656,6 @@ function loadEditorForReEdit(meme) {
             const mouseX = (e.clientX - rect.left) * (canvas.width / rect.width)
             const mouseY = (e.clientY - rect.top) * (canvas.height / rect.height)
     
-            // Ensure we are updating the same block
             textBlocks[selectedTextIndex].x = mouseX
             textBlocks[selectedTextIndex].y = mouseY
     
