@@ -472,23 +472,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
     drawCanvas()
 }
+    
+function handlePointerMove(event) {
+    if (isDragging && selectedTextIndex >= 0) {
+        const rect = canvas.getBoundingClientRect()
+        const pointerX = (event.touches ? event.touches[0].clientX : event.clientX) - rect.left
+        const pointerY = (event.touches ? event.touches[0].clientY : event.clientY) - rect.top
 
-    function handlePointerMove(event) {
-        if (isDragging && selectedTextIndex >= 0) {
-            const rect = canvas.getBoundingClientRect()
-            const pointerX = (event.touches ? event.touches[0].clientX : event.clientX) - rect.left
-            const pointerY = (event.touches ? event.touches[0].clientY : event.clientY) - rect.top
-
-            const mouseX = pointerX * (canvas.width / rect.width)
+        const mouseX = pointerX * (canvas.width / rect.width)
         const mouseY = pointerY * (canvas.height / rect.height)
 
-            textBlocks[selectedTextIndex].x = mouseX
-            textBlocks[selectedTextIndex].y = mouseY
+        textBlocks[selectedTextIndex].x = mouseX
+        textBlocks[selectedTextIndex].y = mouseY
 
-            console.log('Moved Block:', textBlocks[selectedTextIndex])
+        console.log('Moved Block:', textBlocks[selectedTextIndex])
 
-            drawCanvas()
-            event.preventDefault() 
+        drawCanvas()
+        event.preventDefault() 
     }
 }
 
