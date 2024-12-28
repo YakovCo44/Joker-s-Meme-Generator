@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let selectedTextIndex = -1
     let isDragging = false
+    let canvas, ctx
 
     const images = [
         'img/1h3ebt.jpg',
