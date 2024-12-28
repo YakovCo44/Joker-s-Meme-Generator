@@ -8,7 +8,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let selectedTextIndex = -1
     let isDragging = false
-    let canvas, ctx
 
     const images = [
         'img/1h3ebt.jpg',
@@ -386,9 +385,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         })  
 
-        canvas.addEventListener('touchstart', handlePointerStart)
-        canvas.addEventListener('touchmove', handlePointerMove)
-        canvas.addEventListener('touchend', handlePointerEnd)
+        canvas.addEventListener('touchstart', (e) => handlePointerStart(e, canvas))
+        canvas.addEventListener('touchmove', (e) => handlePointerMove(e, canvas))
+        canvas.addEventListener('touchend', () => handlePointerEnd(canvas))
 
         document.getElementById('saveBtn').addEventListener('click', () => {
             const memeData = {
@@ -443,7 +442,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 2000)
     }
 
-    function handlePointerStart(event) {
+    function handlePointerStart(event, canvas) {
     const rect = canvas.getBoundingClientRect()
     const pointerX = (event.touches ? event.touches[0].clientX : event.clientX) - rect.left
     const pointerY = (event.touches ? event.touches[0].clientY : event.clientY) - rect.top
@@ -474,7 +473,7 @@ document.addEventListener('DOMContentLoaded', () => {
     drawCanvas()
 }
     
-function handlePointerMove(event) {
+function handlePointerMove(event, canvas) {
     if (isDragging && selectedTextIndex >= 0) {
         const rect = canvas.getBoundingClientRect()
         const pointerX = (event.touches ? event.touches[0].clientX : event.clientX) - rect.left
@@ -493,7 +492,7 @@ function handlePointerMove(event) {
     }
 }
 
-function handlePointerEnd() {
+function handlePointerEnd(canvas) {
     if (isDragging) {
         console.log('Stopped dragging:', textBlocks[selectedTextIndex])
         isDragging = false
