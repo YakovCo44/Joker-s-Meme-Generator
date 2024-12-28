@@ -448,7 +448,6 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error('Canvas is not defined!')
         return
     }
-    const rect = canvas.getBoundingClientRect()
     const pointerX = (event.touches ? event.touches[0].clientX : event.clientX) - rect.left
     const pointerY = (event.touches ? event.touches[0].clientY : event.clientY) - rect.top
 
