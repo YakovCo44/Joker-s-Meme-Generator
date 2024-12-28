@@ -849,6 +849,3 @@ galleryBtn.addEventListener('click', () => {
 
 
 
-
-
-
