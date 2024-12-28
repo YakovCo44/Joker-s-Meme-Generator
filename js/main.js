@@ -186,8 +186,6 @@ document.addEventListener('DOMContentLoaded', () => {
     
         const canvas = document.getElementById('memeCanvas')
         const ctx = canvas.getContext('2d')
-        const img = new Image()
-        img.src = selectedImage
     
         let isDragging = false
         let textBlocks = []
@@ -390,6 +388,9 @@ document.addEventListener('DOMContentLoaded', () => {
         canvas.addEventListener('touchmove', handlePointerMove)
         canvas.addEventListener('touchend', handlePointerEnd)
 
+        const img = new Image()
+        img.src = selectedImage
+
         document.getElementById('saveBtn').addEventListener('click', () => {
             const memeData = {
                 image: canvas.toDataURL('image/png'), 
@@ -448,6 +449,7 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error('Canvas is not defined!')
         return
     }
+    const rect = canvas.getBoundingClientRect()
     const pointerX = (event.touches ? event.touches[0].clientX : event.clientX) - rect.left
     const pointerY = (event.touches ? event.touches[0].clientY : event.clientY) - rect.top
 
