@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     localStorage.setItem('savedMemes', JSON.stringify(savedMemes))
 
     let selectedTextIndex = -1
+    let isDragging = false
 
     const images = [
         'img/1h3ebt.jpg',
@@ -442,7 +443,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handlePointerStart(event) {
-    console.log('Touch/Pointer Start:', event)
     const rect = canvas.getBoundingClientRect()
     const pointerX = (event.touches ? event.touches[0].clientX : event.clientX) - rect.left
     const pointerY = (event.touches ? event.touches[0].clientY : event.clientY) - rect.top
@@ -463,8 +463,6 @@ document.addEventListener('DOMContentLoaded', () => {
         )
     })
 
-    console.log('Selected Text Index:', selectedTextIndex)
-
     if (selectedTextIndex >= 0) {
         isDragging = true
         console.log('Dragging Started:', textBlocks[selectedTextIndex])
@@ -476,30 +474,28 @@ document.addEventListener('DOMContentLoaded', () => {
 }
 
     function handlePointerMove(event) {
-    console.log('Touch/Pointer Move:', event)
-    if (isDragging && selectedTextIndex >= 0) {
-        const rect = canvas.getBoundingClientRect()
-        const pointerX = (event.touches ? event.touches[0].clientX : event.clientX) - rect.left
-        const pointerY = (event.touches ? event.touches[0].clientY : event.clientY) - rect.top
+        if (isDragging && selectedTextIndex >= 0) {
+            const rect = canvas.getBoundingClientRect()
+            const pointerX = (event.touches ? event.touches[0].clientX : event.clientX) - rect.left
+            const pointerY = (event.touches ? event.touches[0].clientY : event.clientY) - rect.top
 
-        const mouseX = pointerX * (canvas.width / rect.width)
+            const mouseX = pointerX * (canvas.width / rect.width)
         const mouseY = pointerY * (canvas.height / rect.height)
 
-        textBlocks[selectedTextIndex].x = mouseX
-        textBlocks[selectedTextIndex].y = mouseY
+            textBlocks[selectedTextIndex].x = mouseX
+            textBlocks[selectedTextIndex].y = mouseY
 
-        console.log('Moved Block:', textBlocks[selectedTextIndex])
+            console.log('Moved Block:', textBlocks[selectedTextIndex])
 
-        drawCanvas()
-        event.preventDefault() 
+            drawCanvas()
+            event.preventDefault() 
     }
 }
 
 function handlePointerEnd() {
-    console.log('Touch/Pointer End')
     if (isDragging) {
+        console.log('Stopped dragging:', textBlocks[selectedTextIndex])
         isDragging = false
-        console.log('Dragging Stopped:', textBlocks[selectedTextIndex])
     }
 }
 
