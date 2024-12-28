@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let selectedTextIndex = -1
     let isDragging = false
+    let canvas, ctx
 
     const images = [
         'img/1h3ebt.jpg',
@@ -385,9 +386,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         })  
 
-        canvas.addEventListener('touchstart', (e) => handlePointerStart(e, canvas))
-        canvas.addEventListener('touchmove', (e) => handlePointerMove(e, canvas))
-        canvas.addEventListener('touchend', () => handlePointerEnd(canvas))
+        canvas.addEventListener('touchstart', handlePointerStart)
+        canvas.addEventListener('touchmove', handlePointerMove)
+        canvas.addEventListener('touchend', handlePointerEnd)
 
         document.getElementById('saveBtn').addEventListener('click', () => {
             const memeData = {
@@ -442,7 +443,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 2000)
     }
 
-    function handlePointerStart(event, canvas) {
+    function handlePointerStart(event) {
     const rect = canvas.getBoundingClientRect()
     const pointerX = (event.touches ? event.touches[0].clientX : event.clientX) - rect.left
     const pointerY = (event.touches ? event.touches[0].clientY : event.clientY) - rect.top
@@ -472,8 +473,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     drawCanvas()
 }
-    
-function handlePointerMove(event, canvas) {
+
+function handlePointerMove(event) {
     if (isDragging && selectedTextIndex >= 0) {
         const rect = canvas.getBoundingClientRect()
         const pointerX = (event.touches ? event.touches[0].clientX : event.clientX) - rect.left
@@ -492,12 +493,13 @@ function handlePointerMove(event, canvas) {
     }
 }
 
-function handlePointerEnd(canvas) {
+function handlePointerEnd() {
     if (isDragging) {
         console.log('Stopped dragging:', textBlocks[selectedTextIndex])
         isDragging = false
     }
 }
+
 
 function openAboutModal() {
     const modal = document.createElement('div')
