@@ -442,6 +442,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handlePointerStart(event) {
+        console.log('Touch/Pointer Start:', event) // Log the event
         const rect = canvas.getBoundingClientRect()
         const pointerX = (event.touches ? event.touches[0].clientX : event.clientX) - rect.left
         const pointerY = (event.touches ? event.touches[0].clientY : event.clientY) - rect.top
@@ -451,6 +452,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
         console.log('Pointer Start Position:', { mouseX, mouseY })
     
+        // Existing logic for detecting the selected block
         selectedTextIndex = textBlocks.findIndex(block => {
             const textWidth = ctx.measureText(block.text).width
             const textHeight = parseInt(block.font, 10)
@@ -462,16 +464,11 @@ document.addEventListener('DOMContentLoaded', () => {
             )
         })
     
+        console.log('Selected Text Index:', selectedTextIndex)
+    
         if (selectedTextIndex >= 0) {
             isDragging = true
-            const selectedBlock = textBlocks[selectedTextIndex]
-            console.log('Selected Block:', selectedBlock)
-    
-            document.getElementById('memeText').value = selectedBlock.text
-            document.getElementById('textColor').value = selectedBlock.color
-            document.getElementById('fontSize').value = parseInt(selectedBlock.font, 10)
-            const fontParts = selectedBlock.font.split(' ')
-            document.getElementById('fontStyle').value = fontParts[fontParts.length - 1]
+            console.log('Dragging Started:', textBlocks[selectedTextIndex])
         } else {
             console.log('No block selected')
         }
@@ -480,6 +477,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }    
 
     function handlePointerMove(event) {
+        console.log('Touch/Pointer Move:', event)
         if (isDragging && selectedTextIndex >= 0) {
             const rect = canvas.getBoundingClientRect()
             const pointerX = (event.touches ? event.touches[0].clientX : event.clientX) - rect.left
@@ -494,16 +492,17 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log('Moved Block:', textBlocks[selectedTextIndex])
     
             drawCanvas()
-            event.preventDefault()
+            event.preventDefault() // Prevent scrolling
         }
-    }    
-
+    }
+    
     function handlePointerEnd() {
+        console.log('Touch/Pointer End')
         if (isDragging) {
-            console.log('Stopped dragging:', textBlocks[selectedTextIndex])
             isDragging = false
+            console.log('Dragging Stopped:', textBlocks[selectedTextIndex])
         }
-    }    
+    }          
 
 function openAboutModal() {
     const modal = document.createElement('div')
